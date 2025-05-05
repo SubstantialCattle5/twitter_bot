@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trends Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 20px;
+            padding: 0;
+            background-color: #f9f9f9;
+            color: #333;
+        }
+        h1 {
+            color: #0056b3;
+        }
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: #fff;
+            border-radius: 5px;
+            text-align: center;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .button:hover {
+            background-color: #0056b3;
+        }
+        .content {
+            margin-top: 20px;
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .json-data {
+            background-color: #f4f4f4;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            overflow-x: auto;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Trending Topics</h1>
+    <div>
+        <button class="button" id="run-script">Click here to run the script</button>
+    </div>
+    <div id="result" class="content" style="display: none;">
+        <p>These are the most happening topics as on <strong id="timestamp"></strong>:</p>
+        <ul id="trends-list"></ul>
+        <p>The IP address used for this query was <strong id="ip-address"></strong>.</p>
+        <h3>Here’s a JSON extract of this record from the MongoDB:</h3>
+        <div class="json-data" id="json-data"></div>
+    </div>
+
+    <script>
+        document.getElementById("run-script").addEventListener("click", async function () {
+            try {
+                const response = await fetch("/run");
+                if (!response.ok) {
+                    throw new Error("Failed to fetch data.");
+                }
+                const data = await response.json();
+
+                // Populate the result section
+                document.getElementById("timestamp").textContent = data.record.timestamp;
+                document.getElementById("ip-address").textContent = data.record.ip_address;
+
+                const trendsList = document.getElementById("trends-list");
+                trendsList.innerHTML = ""; // Clear previous trends
+                data.record.trends.forEach(trend => {
+                    const listItem = document.createElement("li");
+                    listItem.textContent = trend;
+                    trendsList.appendChild(listItem);
+                });
+
+                document.getElementById("json-data").textContent = JSON.stringify(data.record, null, 4);
+
+                // Show the result section
+                document.getElementById("result").style.display = "block";
+            } catch (error) {
+                console.error("Error:", error);
+                alert("An error occurred while running the script.");
+            }
+        });
+    </script>
+</body>
+</html>
